@@ -45,6 +45,17 @@ vendorRouter.post('/api/vendor/signin', async (req,res)=>{
         res.status(500).json({error: error.message});
     }
     });
+
+    // Fetch all vendors(exclude password)
+    vendorRouter.get('/api/vendors', async (req, res) => {
+        try {
+            const vendors = await Vendor.find({}, '-password'); // Exclude password field
+            // const vendors = await Vendor.find().select('-password'); // Exclude password field
+            return res.status(200).json(vendors);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
         
 module.exports = vendorRouter;
     

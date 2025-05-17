@@ -73,4 +73,16 @@ authRouter.put('/api/users/:id',async(req, res)=>{
     }
 })
 
+// Fetch all users(exclude password)
+authRouter.get('/api/users', async (req, res) => {
+    try {
+        const users = await User.find({}, '-password'); // Exclude password field
+        // const users = await User.find().select('-password'); // Exclude password field
+        return res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
 module.exports = authRouter;
