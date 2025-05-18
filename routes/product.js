@@ -53,4 +53,46 @@ productRouter.get('/api/products-by-category/:category', async(req, res) =>{
         res.status(500).json({error: e.message});
     }
 })
+
+//new route for retrieving related products by subcategory
+productRouter.get('/api/related-products-by-subcategory/:productId', async(req, res) =>{
+    try {
+        const {productId} = req.params;
+        // first find the product to get its subcategory
+        const product = await Product.findById(productId);
+        if(!product || product.length == 0){
+            return res.status(404).json({msg:"Product not found"});
+        }else{
+            //find related products by subcategory of the retrieved product
+            const relatedProducts = await Product.find({
+                subCategory: product.subCategory,
+                 _id: {$ne: productId}
+            }); // Exclude the current product
+            if(!relatedProducts || relatedProducts.length == 0){
+                return res.status(404).json({msg:"No related products found"});
+            }
+            return res.status(200).json(relatedProducts)
+        }
+    } catch (e) {
+        return res.status(500).json({error: e.message});
+    }
+})
+
+// route for retrieving the top 10 highest rated products
+productRouter.get('/api/top-rated-products', async(req, res) => {
+    try {
+        //fetch all products and sort them by average rating in descending order(highest rating first)
+        const topRatedProducts = await Product.find({}).sort({averageRating: -1}).limit(3); // sort product by average rating in descending order
+        // check if any products were found
+        if(!topRatedProducts || topRatedProducts.length == 0){
+            return res.status(404).json({msg:"No products found"});
+        }else{
+            //return the top rated products as a response
+            return res.status(200).json(topRatedProducts)
+        }
+    } catch (e) {
+        // handle any server errors that occur during the request
+        return res.status(500).json({error: e.message});
+    }
+})
 module.exports = productRouter;
