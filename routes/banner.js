@@ -19,7 +19,7 @@ bannerRouter.get('/api/banner', async (req, res) => {
     try {
         const banners = await Banner.find();
         return res.status(200).send(banners);    
-    } catch (error) {
+    } catch (e) {
         res.status(500).json({error: e.message});
     }
 });

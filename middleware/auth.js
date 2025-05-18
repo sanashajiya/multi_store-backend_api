@@ -3,22 +3,16 @@ const User = require('../models/user');
 const Vendor = require('../models/vendor');
 
 // Authentication middleware
-// this Middleware function checks if user is authenticated
 const auth = async (req, res, next) => {
   try {
-    // extract the token from the request headers
     const token = req.header('x-auth-token');
-    // if no token is provided , return 401 (unauthorized) response
     if (!token) {
       return res.status(401).json({ message: 'No token, authorization denied' });
     }
 
-    // verify the jwt token using the secret key
     const verified = jwt.verify(token, 'passwordKey');
-
-    // if the token verification failed, return 401
     if (!verified) {
-      return res.status(401).json({ message: 'Token verification failed, authorization denied' });
+      return res.status(401).json({ message: 'Token verification failed' });
     }
 
     // Try finding user first
@@ -35,12 +29,10 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ message: 'User or Vendor not found, authorization denied' });
     }
 
-    // attach the authenticated user 
     req.user = user;
     req.user.role = role; // Add role explicitly for further use
     req.token = token;
 
-    // proceed to next middleware or router handler
     next();
   } catch (e) {
     console.error('Auth middleware error:', e.message);
@@ -54,8 +46,6 @@ const vendorAuth = (req, res, next) => {
     if (req.user.role !== 'vendor') {
       return res.status(403).json({ message: 'Access denied, only vendors are allowed' });
     }
-
-    // if the user is a vendor, proceed to the next middleware or route handler
     next();
   } catch (e) {
     console.error('VendorAuth error:', e.message);
