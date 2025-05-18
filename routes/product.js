@@ -111,6 +111,39 @@ productRouter.get('/api/products-by-subCategory/:subCategory', async (req, res) 
     }
 })
 
-
+//Route for searching products by name or description
+productRouter.get('/api/search-products', async (req, res) => {
+    try {
+        //extract the query parameter from the request
+        const {query} = req.query;
+        //validate that a query is provided
+        //if missing, return a 400 status with an error message
+        if(!query){
+            return res.status(400).json({msg:"Please provide a search query"});
+        }
+        //search for products that match the query in either the product name or description
+        //using a case-insensitive regex search
+        const products = await Product.find({
+            $or: [
+                // Regex will match any product name or description that contains the query string
+                // For example, if the query is "shoe", it will match "shoe", "Shoes", "Nike Shoes", etc.
+                {productName: {$regex: query, $options: 'i'}},
+                {description: {$regex: query, $options: 'i'}}
+            ]
+        });
+        // check if any products were found, if not, return a 404 status with an error message
+        if(!products || products.length == 0){
+            return res.status(404).json({msg:"No products found"});
+        }
+        //if products were found, return them in the response with a 200 status
+        else{
+            return res.status(200).json(products)
+        }
+    }
+    //catch any errors that occur during the request and return a 500 status with an error message
+     catch (e) {
+        return res.status(500).json({error: e.message});
+    }
+});
 
 module.exports = productRouter;
