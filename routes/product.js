@@ -95,4 +95,22 @@ productRouter.get('/api/top-rated-products', async(req, res) => {
         return res.status(500).json({error: e.message});
     }
 })
+
+productRouter.get('/api/products-by-subCategory/:subCategory', async (req, res) => {
+    try {
+        const {subCategory} = req.params;
+        const products = await Product.find({subCategory: subCategory});
+        // check if any products were found
+        if(!products || products.length == 0){
+            return res.status(404).json({msg:"No products found in this subcategory"});
+        }else{
+            return res.status(200).json(products)
+        }
+    } catch (e) {
+        return res.status(500).json({error: e.message});
+    }
+})
+
+
+
 module.exports = productRouter;
